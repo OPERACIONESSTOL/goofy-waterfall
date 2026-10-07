@@ -1,3 +1,5 @@
+self.__WB_MANIFEST = [];
+
 const CACHE_NAME = "medicion-productos-v3";
 
 const URLS_TO_CACHE = ["/", "/index.html", "/manifest.json"];

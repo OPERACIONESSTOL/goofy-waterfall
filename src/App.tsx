@@ -57,6 +57,18 @@ type ItemCaja = {
   volumenTotal: number;
 };
 
+type TipoPallet =
+  | "MUEBLE"
+  | "EURO"
+  | "CAJA SENSIBLE AZUL"
+  | "CAJA SENSIBLE NEGRA";
+
+type FotoPallet = {
+  id: string;
+  archivo: File;
+  url: string;
+};
+
 function App() {
   /* =========================================================
      CONSTANTES
@@ -74,6 +86,7 @@ function App() {
     "SERVICIOS GENERALES",
     "SIG Y SEGURIDAD INTEGRAL",
   ]);
+
 
   /* =========================================================
      SESIÓN
@@ -99,6 +112,7 @@ function App() {
 
   const [codigoPallet, setCodigoPallet] = useState("");
   const [proyectoPallet, setProyectoPallet] = useState("");
+  const [tipoPallet, setTipoPallet] = useState<TipoPallet | "">("");
 
   const [palletLargo, setPalletLargo] = useState("");
   const [palletAncho, setPalletAncho] = useState("");
@@ -111,6 +125,8 @@ function App() {
       : 0;
 
   const [guardandoAuditoria, setGuardandoAuditoria] = useState(false);
+  const [palletCerrado, setPalletCerrado] = useState(false);
+  const [cerrandoPallet, setCerrandoPallet] = useState(false);
   const [cargandoAuditoria, setCargandoAuditoria] = useState(false);
   const [exportandoAuditoria, setExportandoAuditoria] = useState(false);
 
@@ -138,6 +154,8 @@ function App() {
   const [modoContenidoPallet, setModoContenidoPallet] = useState<
     "MENU" | "CAJA" | "SKU_SUELTO"
   >("MENU");
+
+  const [fotosPallet, setFotosPallet] = useState<FotoPallet[]>([]);
   const [skuSueltoBusqueda, setSkuSueltoBusqueda] = useState("");
   const [skuSueltoProducto, setSkuSueltoProducto] = useState<any | null>(null);
   const [skuSueltoCantidad, setSkuSueltoCantidad] = useState("1");
@@ -254,12 +272,18 @@ function App() {
   const limpiarAuditoriaPallet = () => {
     setCodigoPallet("");
     setProyectoPallet("");
+    setTipoPallet("");
     setPalletLargo("");
     setPalletAncho("");
     setPalletAlto("");
+    fotosPallet.forEach((foto) => URL.revokeObjectURL(foto.url));
+    setFotosPallet([]);
+    if (fotoCamaraInputRef.current) fotoCamaraInputRef.current.value = "";
+    if (fotoGaleriaInputRef.current) fotoGaleriaInputRef.current.value = "";
 
     // Al limpiar, se inicia una nueva auditoría desde el paso 1.
     setAuditoriaPalletId(null);
+    setPalletCerrado(false);
     setModoContenidoPallet("MENU");
     setCajasAuditoria([]);
     setCajaSeleccionadaAuditoria(null);
@@ -275,6 +299,83 @@ function App() {
     setSkuSueltoProducto(null);
     setSkuSueltoCantidad("1");
     setMensaje("");
+  };
+
+  const obtenerOcupacionCaja = (caja: any) => {
+    if (!caja || !Number(caja.volumen_caja || 0)) {
+      return 0;
+    }
+
+    const volumenCaja = Number(caja.volumen_caja || 0);
+
+    const volumenContenido = skusCajaRegistrados
+      .filter((item) => item.auditoria_caja_id === caja.id)
+      .reduce((total, item) => total + Number(item.volumen_total || 0), 0);
+
+    return (volumenContenido / volumenCaja) * 100;
+  };
+
+  const volumenCajasPallet = cajasAuditoria.reduce(
+    (total, caja) => total + Number(caja.volumen_caja || 0),
+    0
+  );
+  const volumenSkuSueltosPallet = skuSueltoRegistrados.reduce(
+    (total, item) => total + Number(item.volumen_total || 0),
+    0
+  );
+  const volumenOcupadoPallet =
+    volumenCajasPallet + volumenSkuSueltosPallet;
+  const porcentajeOcupacionPallet =
+    volumenFisicoPallet > 0
+      ? (volumenOcupadoPallet / volumenFisicoPallet) * 100
+      : 0;
+  const unidadesAuditadasPallet =
+    skusCajaRegistrados.reduce(
+      (total, item) => total + Number(item.cantidad || 0),
+      0
+    ) +
+    skuSueltoRegistrados.reduce(
+      (total, item) => total + Number(item.cantidad || 0),
+      0
+    );
+
+  const cantidadFotosRequerida =
+    tipoPallet === "MUEBLE" || tipoPallet === "EURO" ? 4 : 2;
+
+  const manejarFotosPallet = (event: ChangeEvent<HTMLInputElement>) => {
+    const archivos = Array.from(event.target.files || []);
+    if (archivos.length === 0) return;
+
+    const tiposPermitidos = new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ]);
+
+    const validos = archivos.filter(
+      (archivo) =>
+        tiposPermitidos.has(archivo.type) && archivo.size <= 10 * 1024 * 1024
+    );
+    const disponibles = Math.max(cantidadFotosRequerida - fotosPallet.length, 0);
+    const seleccionados = validos.slice(0, disponibles);
+    const nuevos = seleccionados.map((archivo) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      archivo,
+      url: URL.createObjectURL(archivo),
+    }));
+
+    setFotosPallet((actuales) => [...actuales, ...nuevos]);
+    event.target.value = "";
+
+    if (validos.length !== archivos.length) {
+      setMensaje("Algunas fotos se omitieron: use imágenes permitidas de hasta 10 MB.");
+    } else if (archivos.length > disponibles) {
+      setMensaje(`Este tipo de pallet requiere exactamente ${cantidadFotosRequerida} fotos.`);
+    } else {
+      setMensaje(`${fotosPallet.length + nuevos.length} de ${cantidadFotosRequerida} fotos cargadas.`);
+    }
   };
 
   const guardarAuditoriaPallet = async () => {
@@ -296,8 +397,20 @@ function App() {
       return;
     }
 
-    if (!proyecto) {
-      setMensaje("Ingrese la Tienda.");
+    if (!/^\d+$/.test(proyecto)) {
+      setMensaje("Ingrese el código numérico de la tienda.");
+      return;
+    }
+
+    if (!tipoPallet) {
+      setMensaje("Seleccione el tipo de pallet.");
+      return;
+    }
+
+    if (fotosPallet.length !== cantidadFotosRequerida) {
+      setMensaje(
+        `Para un pallet ${tipoPallet.toLowerCase()} debe adjuntar exactamente ${cantidadFotosRequerida} fotos.`
+      );
       return;
     }
 
@@ -320,10 +433,40 @@ function App() {
 
     try {
       const fechaHora = obtenerFechaHoraPeru();
+      const fotoPaths: string[] = [];
+
+      for (const [indice, foto] of fotosPallet.entries()) {
+        const extension =
+          foto.archivo.name
+            .split(".")
+            .pop()
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]/g, "") || "jpg";
+        const fotoPath = `auditorias/${Date.now()}-${indice}-${Math.random()
+          .toString(36)
+          .slice(2)}.${extension}`;
+        const { error: errorFoto } = await supabase.storage
+          .from("auditoria-pallets")
+          .upload(fotoPath, foto.archivo, {
+            contentType: foto.archivo.type,
+            upsert: false,
+          });
+
+        if (errorFoto) {
+          throw new Error(
+            `No se pudo guardar la foto ${indice + 1}: ${errorFoto.message}`
+          );
+        }
+
+        fotoPaths.push(fotoPath);
+      }
 
       const datos = {
         codigo_pallet: codigo,
         tienda: proyecto,
+        tipo_pallet: tipoPallet,
+        foto_pallet_path: fotoPaths[0],
+        foto_pallet_paths: fotoPaths,
         largo: Number(palletLargo),
         ancho: Number(palletAncho),
         alto: Number(palletAlto),
@@ -346,6 +489,7 @@ function App() {
       }
 
       setAuditoriaPalletId(auditoriaCreada.id);
+      setPalletCerrado(false);
       setMensaje(
         `✓ Auditoría registrada correctamente.\n\n` +
           `Pallet: ${codigo}\n` +
@@ -364,7 +508,64 @@ function App() {
       setGuardandoAuditoria(false);
     }
   };
+  const cerrarAuditoriaPallet = async () => {
+    if (!auditoriaPalletId || !personalLogin) {
+      setMensaje("No se encontró la auditoría o el usuario para cerrarla.");
+      return;
+    }
+
+    if (palletCerrado || cerrandoPallet) return;
+
+    if (!window.confirm("¿Confirmas que la auditoría de este pallet terminó?")) {
+      return;
+    }
+
+    setCerrandoPallet(true);
+    setMensaje("");
+
+    try {
+      const { data, error } = await supabase
+        .from("auditoria_pallet")
+        .update({
+          estado_auditoria: "CERRADO",
+          fecha_cierre: obtenerFechaHoraPeru(),
+          cerrado_por: personalLogin.NOMBRE || "",
+        })
+        .eq("id", auditoriaPalletId)
+        .eq("estado_auditoria", "EN PROCESO")
+        .select("id")
+        .maybeSingle();
+
+      if (error) {
+        throw new Error(`No se pudo cerrar el pallet: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error(
+          "No se cerró el pallet. Puede estar cerrado o la política de Supabase no permite actualizarlo."
+        );
+      }
+
+      await cargarHistorialAuditoria();
+      limpiarAuditoriaPallet();
+      setMensaje(
+        "✓ Auditoría finalizada. El pallet quedó cerrado y el formulario está listo para una nueva auditoría."
+      );
+    } catch (error: any) {
+      console.error("ERROR CERRANDO AUDITORÍA:", error);
+      setMensaje(error?.message || "No se pudo cerrar la auditoría.");
+    } finally {
+      setCerrandoPallet(false);
+    }
+  };
   const agregarCajaAuditoria = async () => {
+    if (!personalLogin) {
+      setMensaje(
+        "No se encontró la información del usuario para registrar la caja."
+      );
+      return;
+    }
+
     if (!auditoriaPalletId) {
       setMensaje("Primero debe registrar el pallet.");
       return;
@@ -389,6 +590,7 @@ function App() {
 
     try {
       const numeroCaja = cajasAuditoria.length + 1;
+      const fechaHora = obtenerFechaHoraPeru();
 
       const datosCaja = {
         auditoria_pallet_id: auditoriaPalletId,
@@ -397,6 +599,7 @@ function App() {
         ancho: Number(cajaAncho),
         alto: Number(cajaAlto),
         volumen_caja: volumenCaja,
+        fecha_hora: fechaHora,
       };
 
       const { data, error } = await supabase
@@ -573,6 +776,13 @@ function App() {
     }
   };
   const agregarSkuCajaAuditoria = async () => {
+    if (!personalLogin) {
+      setMensaje(
+        "No se encontró la información del usuario para registrar el SKU de la caja."
+      );
+      return;
+    }
+
     if (!auditoriaPalletId) {
       setMensaje("Primero debe registrar el pallet.");
       return;
@@ -602,6 +812,7 @@ function App() {
       const sku = String(skuCajaProducto.SKU || "").trim();
       const ean = String(skuCajaProducto.EAN || "").trim();
       const descripcion = skuCajaProducto.DESCRIPCION || "";
+      const fechaHora = obtenerFechaHoraPeru();
 
       // Buscar volumen unitario en DATA_MAESTRO
       let volumenUnitario = 0;
@@ -637,6 +848,7 @@ function App() {
         cantidad,
         volumen_unitario_maestro: volumenUnitario,
         volumen_total: volumenTotal,
+        fecha_hora: fechaHora,
       };
 
       const { data, error } = await supabase
@@ -678,6 +890,13 @@ function App() {
     }
   };
   const agregarSkuSueltoAuditoria = async () => {
+    if (!personalLogin) {
+      setMensaje(
+        "No se encontró la información del usuario para registrar el SKU suelto."
+      );
+      return;
+    }
+
     if (!auditoriaPalletId) {
       setMensaje("Primero debe registrar el pallet.");
       return;
@@ -704,6 +923,7 @@ function App() {
       const ean = String(skuSueltoProducto.EAN || "").trim();
 
       const descripcion = skuSueltoProducto.DESCRIPCION || "";
+      const fechaHora = obtenerFechaHoraPeru();
 
       /*
         Por ahora tomamos el volumen unitario desde
@@ -743,23 +963,21 @@ function App() {
         cantidad,
         volumen_unitario_maestro: volumenUnitario,
         volumen_total: volumenTotal,
+        fecha_hora: fechaHora,
       };
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("auditoria_pallet_sku_suelto")
-        .insert(datos)
-        .select("*")
-        .single();
+        .insert(datos);
 
       if (error) {
         throw new Error(`No se pudo registrar el SKU suelto: ${error.message}`);
       }
 
-      if (!data) {
-        throw new Error("No se pudo obtener el registro creado.");
-      }
-
-      setSkuSueltoRegistrados((prev) => [...prev, data]);
+      setSkuSueltoRegistrados((prev) => [
+        ...prev,
+        { id: `${Date.now()}-${sku}`, ...datos },
+      ]);
 
       setSkuSueltoBusqueda("");
       setSkuSueltoProducto(null);
@@ -921,6 +1139,8 @@ function App() {
   const inputBusquedaRef = useRef<HTMLInputElement>(null);
 
   const inputDniRef = useRef<HTMLInputElement>(null);
+  const fotoCamaraInputRef = useRef<HTMLInputElement>(null);
+  const fotoGaleriaInputRef = useRef<HTMLInputElement>(null);
 
   /* =========================================================
      FECHA HORA PERÚ
@@ -1001,6 +1221,10 @@ function App() {
 
     if (/^\d+\.0+$/.test(dni)) {
       dni = dni.split(".")[0];
+    }
+
+    if (/^\d+$/.test(dni)) {
+      dni = dni.replace(/^0+(?=\d)/, "");
     }
 
     return dni;
@@ -1129,7 +1353,49 @@ function App() {
   };
 
   useEffect(() => {
-    cargarPersonal();
+    const refrescarPersonalDesdeSupabase = () => {
+      void cargarPersonal();
+    };
+
+    refrescarPersonalDesdeSupabase();
+
+    const canalPersonal = supabase
+      .channel("personal-live-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "PERSONAL",
+        },
+        () => {
+          refrescarPersonalDesdeSupabase();
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Supabase conectado en tiempo real para PERSONAL.");
+        }
+      });
+
+    const manejarFoco = () => {
+      refrescarPersonalDesdeSupabase();
+    };
+
+    const manejarVisibilidad = () => {
+      if (document.visibilityState === "visible") {
+        refrescarPersonalDesdeSupabase();
+      }
+    };
+
+    window.addEventListener("focus", manejarFoco);
+    document.addEventListener("visibilitychange", manejarVisibilidad);
+
+    return () => {
+      window.removeEventListener("focus", manejarFoco);
+      document.removeEventListener("visibilitychange", manejarVisibilidad);
+      supabase.removeChannel(canalPersonal);
+    };
   }, []);
 
   /* =========================================================
@@ -3530,14 +3796,132 @@ function App() {
               </div>
 
               <div className="campo">
-                <label>Tienda</label>
+                <label>Tipo de pallet</label>
+                <select
+                  value={tipoPallet}
+                  onChange={(e) => {
+                    const nuevoTipo = e.target.value as TipoPallet | "";
+                    if (nuevoTipo !== tipoPallet) {
+                      fotosPallet.forEach((foto) => URL.revokeObjectURL(foto.url));
+                      setFotosPallet([]);
+                    }
+                    setTipoPallet(nuevoTipo);
+                    setMensaje("");
+                  }}
+                  required
+                >
+                  <option value="">Seleccione el tipo de pallet</option>
+                  <option value="MUEBLE">Mueble</option>
+                  <option value="EURO">Euro</option>
+                  <option value="CAJA SENSIBLE AZUL">Caja sensible azul</option>
+                  <option value="CAJA SENSIBLE NEGRA">Caja sensible negra</option>
+                </select>
+              </div>
+
+              <div className="campo">
+                <label>Código numérico de tienda</label>
 
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={proyectoPallet}
-                  onChange={(e) => setProyectoPallet(e.target.value)}
-                  placeholder="Ej. Cusco / Piura"
+                  onChange={(e) =>
+                    setProyectoPallet(e.target.value.replace(/\D/g, ""))
+                  }
+                  placeholder="Ej. 123"
+                  required
                 />
+              </div>
+
+              <div className="campo">
+                <label>
+                  Fotos del pallet auditado (obligatorias): {fotosPallet.length} / {cantidadFotosRequerida}
+                </label>
+                <small>
+                  {tipoPallet === "MUEBLE" || tipoPallet === "EURO"
+                    ? "Mueble y Euro requieren 4 fotos."
+                    : "Las cajas sensibles requieren 2 fotos."}
+                </small>
+                <input
+                  ref={fotoCamaraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={manejarFotosPallet}
+                  style={{ display: "none" }}
+                />
+                <input
+                  ref={fotoGaleriaInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                  multiple
+                  onChange={manejarFotosPallet}
+                  style={{ display: "none" }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                    marginTop: "10px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="guardar"
+                    onClick={() => fotoCamaraInputRef.current?.click()}
+                    disabled={!tipoPallet || fotosPallet.length >= cantidadFotosRequerida}
+                  >
+                    📷 Tomar foto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fotoGaleriaInputRef.current?.click()}
+                    disabled={!tipoPallet || fotosPallet.length >= cantidadFotosRequerida}
+                  >
+                    🖼 Elegir de galería
+                  </button>
+                </div>
+                <small>Formatos JPG, PNG, WEBP o HEIC. Máximo 10 MB.</small>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                    gap: "10px",
+                    marginTop: "12px",
+                  }}
+                >
+                  {fotosPallet.map((foto, indice) => (
+                    <div key={foto.id}>
+                      <img
+                        src={foto.url}
+                        alt={`Foto ${indice + 1} del pallet`}
+                        style={{
+                          width: "100%",
+                          aspectRatio: "1",
+                          objectFit: "cover",
+                          borderRadius: "6px",
+                          border: "1px solid #d9d9d9",
+                        }}
+                      />
+                      <small>Foto {indice + 1}</small>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          URL.revokeObjectURL(foto.url);
+                          setFotosPallet((actuales) =>
+                            actuales.filter((actual) => actual.id !== foto.id)
+                          );
+                        }}
+                        aria-label={`Quitar foto ${indice + 1}`}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div
@@ -3659,6 +4043,203 @@ function App() {
                 <div>
                   <strong>Tienda:</strong> {proyectoPallet || "-"}
                 </div>
+                <div>
+                  <strong>Tipo:</strong> {tipoPallet || "-"}
+                </div>
+                <div style={{ marginTop: "12px" }}>
+                  <strong>{fotosPallet.length} fotos adjuntadas</strong>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                      gap: "10px",
+                      marginTop: "10px",
+                    }}
+                  >
+                    {fotosPallet.map((foto, indice) => (
+                      <img
+                        key={foto.id}
+                        src={foto.url}
+                        alt={`Foto ${indice + 1} del pallet auditado`}
+                        style={{
+                          width: "100%",
+                          aspectRatio: "1",
+                          objectFit: "cover",
+                          borderRadius: "6px",
+                          border: "1px solid #d9d9d9",
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  margin: "24px 0",
+                  padding: "18px 0",
+                  borderTop: "1px solid #d9d9d9",
+                  borderBottom: "1px solid #d9d9d9",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <h3 style={{ margin: 0 }}>Resumen de contenido y ocupabilidad</h3>
+                    <small>
+                      Estado: {palletCerrado ? "CERRADO" : "EN PROCESO"}
+                    </small>
+                  </div>
+                  <button
+                    className="guardar"
+                    onClick={cerrarAuditoriaPallet}
+                    disabled={palletCerrado || cerrandoPallet}
+                  >
+                    {palletCerrado
+                      ? "✓ Pallet cerrado"
+                      : cerrandoPallet
+                        ? "Cerrando..."
+                        : "✓ Cerrar pallet"}
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                    gap: "12px",
+                    margin: "18px 0",
+                  }}
+                >
+                  <div>
+                    <small>Cajas registradas</small>
+                    <div><strong>{cajasAuditoria.length}</strong></div>
+                  </div>
+                  <div>
+                    <small>Unidades auditadas</small>
+                    <div><strong>{unidadesAuditadasPallet}</strong></div>
+                  </div>
+                  <div>
+                    <small>Volumen ocupado</small>
+                    <div><strong>{volumenOcupadoPallet.toFixed(4)} m³</strong></div>
+                  </div>
+                  <div>
+                    <small>Ocupabilidad del pallet</small>
+                    <div>
+                      <strong>{porcentajeOcupacionPallet.toFixed(1)}%</strong>
+                      {porcentajeOcupacionPallet > 100
+                        ? " · Excede capacidad"
+                        : porcentajeOcupacionPallet < 50
+                          ? " · Baja"
+                          : " · En rango"}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  role="progressbar"
+                  aria-label="Ocupabilidad del pallet"
+                  aria-valuenow={Math.min(porcentajeOcupacionPallet, 100)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  style={{
+                    height: "12px",
+                    overflow: "hidden",
+                    borderRadius: "6px",
+                    background: "#e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${Math.min(Math.max(porcentajeOcupacionPallet, 0), 100)}%`,
+                      height: "100%",
+                      background:
+                        porcentajeOcupacionPallet > 100 ? "#dc2626" : "#16804a",
+                    }}
+                  />
+                </div>
+                <small>
+                  Se compara el volumen exterior de las cajas y el volumen de
+                  los SKU sueltos con el volumen físico del pallet. La ocupación
+                  de cada caja se calcula con sus SKU por separado.
+                </small>
+
+                <div className="tabla-historial" style={{ marginTop: "18px" }}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Contenido agregado</th>
+                        <th>SKU y unidades</th>
+                        <th>Volumen</th>
+                        <th>Ocupación de caja</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cajasAuditoria.map((caja) => {
+                        const itemsCaja = skusCajaRegistrados.filter(
+                          (item) => item.auditoria_caja_id === caja.id
+                        );
+
+                        return (
+                          <tr key={`resumen-caja-${caja.id}`}>
+                            <td>
+                              <strong>Caja {caja.numero_caja}</strong>
+                              <br />
+                              <small>
+                                {caja.ancho} × {caja.alto} × {caja.largo} cm
+                              </small>
+                            </td>
+                            <td>
+                              {itemsCaja.length > 0
+                                ? itemsCaja.map((item) => (
+                                    <div key={item.id}>
+                                      <strong>{item.sku}</strong> × {item.cantidad}
+                                      {item.descripcion ? ` · ${item.descripcion}` : ""}
+                                    </div>
+                                  ))
+                                : "Sin SKU agregado"}
+                            </td>
+                            <td>
+                              {Number(caja.volumen_caja || 0).toFixed(4)} m³
+                            </td>
+                            <td>{obtenerOcupacionCaja(caja).toFixed(1)}%</td>
+                          </tr>
+                        );
+                      })}
+                      {skuSueltoRegistrados.map((item) => (
+                        <tr key={`resumen-suelto-${item.id}`}>
+                          <td>
+                            <strong>SKU suelto</strong>
+                            <br />
+                            <small>{item.descripcion || "Sin descripción"}</small>
+                          </td>
+                          <td>
+                            <strong>{item.sku}</strong> × {item.cantidad}
+                          </td>
+                          <td>
+                            {Number(item.volumen_total || 0).toFixed(4)} m³
+                          </td>
+                          <td>No aplica</td>
+                        </tr>
+                      ))}
+                      {cajasAuditoria.length === 0 &&
+                        skuSueltoRegistrados.length === 0 && (
+                          <tr>
+                            <td colSpan={4}>
+                              Aún no se agregaron cajas ni SKU sueltos.
+                            </td>
+                          </tr>
+                        )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* =================================================
@@ -3673,31 +4254,34 @@ function App() {
                       marginBottom: "20px",
                     }}
                   >
-                    Seleccione qué desea registrar. Puede registrar cajas y SKU
-                    sueltos en cualquier orden.
+                    {palletCerrado
+                      ? "La auditoría de este pallet ya fue finalizada."
+                      : "Seleccione qué desea registrar. Puede registrar cajas y SKU sueltos en cualquier orden."}
                   </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(220px, 1fr))",
-                      gap: "15px",
-                    }}
-                  >
-                    <button className="guardar" onClick={abrirAgregarCaja}>
-                      📦 Agregar caja
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setModoContenidoPallet("SKU_SUELTO");
-                        setMensaje("");
+                  {!palletCerrado && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fit, minmax(220px, 1fr))",
+                        gap: "15px",
                       }}
                     >
-                      🏷️ Agregar SKU suelto
-                    </button>
-                  </div>
+                      <button className="guardar" onClick={abrirAgregarCaja}>
+                        📦 Agregar caja
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setModoContenidoPallet("SKU_SUELTO");
+                          setMensaje("");
+                        }}
+                      >
+                        🏷️ Agregar SKU suelto
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -3705,7 +4289,7 @@ function App() {
         FLUJO DE CAJA
     ================================================= */}
 
-              {modoContenidoPallet === "CAJA" && (
+              {modoContenidoPallet === "CAJA" && !palletCerrado && (
                 <>
                   <div
                     className="mensaje"
@@ -3828,41 +4412,84 @@ function App() {
                             <th>Alto</th>
                             <th>Largo</th>
                             <th>Volumen</th>
+                            <th>Ocupación</th>
+                            <th>Estado</th>
                             <th>Contenido</th>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {cajasAuditoria.map((caja) => (
-                            <tr key={caja.id}>
-                              <td>
-                                <strong>Caja {caja.numero_caja}</strong>
-                              </td>
+                          {cajasAuditoria.map((caja) => {
+                            const ocupacion = obtenerOcupacionCaja(caja);
+                            const estadoCaja =
+                              ocupacion >= 85
+                                ? "OK"
+                                : ocupacion >= 50
+                                  ? "Verificar"
+                                  : "Revalidar";
 
-                              <td>{Number(caja.ancho).toFixed(2)} cm</td>
+                            return (
+                              <tr key={caja.id}>
+                                <td>
+                                  <strong>Caja {caja.numero_caja}</strong>
+                                </td>
 
-                              <td>{Number(caja.alto).toFixed(2)} cm</td>
+                                <td>{Number(caja.ancho).toFixed(2)} cm</td>
 
-                              <td>{Number(caja.largo).toFixed(2)} cm</td>
+                                <td>{Number(caja.alto).toFixed(2)} cm</td>
 
-                              <td>
-                                <strong>
-                                  {Number(caja.volumen_caja || 0).toFixed(4)} m³
-                                </strong>
-                              </td>
+                                <td>{Number(caja.largo).toFixed(2)} cm</td>
 
-                              <td>
-                                <button
-                                  onClick={() => {
-                                    setCajaSeleccionadaAuditoria(caja);
-                                    setMensaje("");
-                                  }}
-                                >
-                                  📦 Ver contenido
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                                <td>
+                                  <strong>
+                                    {Number(caja.volumen_caja || 0).toFixed(4)} m³
+                                  </strong>
+                                </td>
+
+                                <td>
+                                  <strong>
+                                    {ocupacion.toFixed(1)}%
+                                  </strong>
+                                </td>
+
+                                <td>
+                                  <span
+                                    style={{
+                                      display: "inline-block",
+                                      padding: "4px 8px",
+                                      borderRadius: "999px",
+                                      background:
+                                        estadoCaja === "OK"
+                                          ? "#dff8e7"
+                                          : estadoCaja === "Verificar"
+                                            ? "#fff4d6"
+                                            : "#fde2e2",
+                                      color:
+                                        estadoCaja === "OK"
+                                          ? "#166534"
+                                          : estadoCaja === "Verificar"
+                                            ? "#92400e"
+                                            : "#991b1b",
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    {estadoCaja}
+                                  </span>
+                                </td>
+
+                                <td>
+                                  <button
+                                    onClick={() => {
+                                      setCajaSeleccionadaAuditoria(caja);
+                                      setMensaje("");
+                                    }}
+                                  >
+                                    📦 Ver contenido
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -4064,7 +4691,7 @@ function App() {
                 </>
               )}
 
-              {modoContenidoPallet === "SKU_SUELTO" && (
+              {modoContenidoPallet === "SKU_SUELTO" && !palletCerrado && (
                 <>
                   <h3>🏷️ Registrar SKU suelto</h3>
 
@@ -4263,48 +4890,6 @@ function App() {
               )}
             </div>
           )}
-
-          {/* =====================================================
-            EXPORTACIÓN DE AUDITORÍAS
-            El historial de pallets NO se muestra a los operarios.
-            Los registros permanecen guardados en Supabase y pueden
-            exportarse mediante el botón de Excel.
-          ===================================================== */}
-
-          <div
-            className="producto"
-            style={{
-              marginBottom: "20px",
-            }}
-          >
-            <h2>③ Auditorías registradas</h2>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap",
-                marginBottom: "10px",
-              }}
-            >
-              <button
-                className="guardar"
-                onClick={exportarAuditoriaPallet}
-                disabled={exportandoAuditoria}
-              >
-                {exportandoAuditoria
-                  ? "Exportando..."
-                  : "📊 Exportar auditorías a Excel"}
-              </button>
-            </div>
-
-            <div className="mensaje">
-              Las auditorías realizadas se guardan automáticamente.
-              <br />
-              El historial de pallets no se muestra en pantalla para evitar
-              confusiones durante la operación.
-            </div>
-          </div>
 
           {/* =====================================================
             MENSAJE GENERAL
