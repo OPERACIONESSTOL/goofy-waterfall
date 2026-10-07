@@ -1,0 +1,1319 @@
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --fondo: #eef2f7;
+  --fondo-secundario: #e5eaf1;
+  --tarjeta: #ffffff;
+  --tarjeta-hover: #f8fafc;
+
+  --principal: #17365d;
+  --principal-2: #24558f;
+  --principal-claro: #e8f0fa;
+
+  --texto: #172033;
+  --texto-secundario: #64748b;
+  --texto-suave: #94a3b8;
+
+  --borde: #d7dee8;
+
+  --verde: #16845b;
+  --verde-claro: #e8f7f0;
+
+  --amarillo: #d89b00;
+  --amarillo-claro: #fff7df;
+
+  --rojo: #c83c3c;
+  --rojo-claro: #fff0f0;
+
+  --sombra: 0 8px 25px rgba(15, 35, 60, 0.08);
+  --sombra-fuerte: 0 18px 45px rgba(15, 35, 60, 0.16);
+
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(
+      circle at top left,
+      rgba(36, 85, 143, 0.12),
+      transparent 35%
+    ),
+    linear-gradient(135deg, #e8edf4 0%, #f3f6fa 45%, #e7edf5 100%);
+
+  color: var(--texto);
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+  min-height: 100vh;
+  padding: 28px 18px 50px;
+}
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+.contenedor {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+}
+
+/* =========================================================
+   TARJETAS PRINCIPALES
+========================================================= */
+
+.medicion,
+.producto,
+.pieza {
+  background: var(--tarjeta);
+  border: 1px solid rgba(215, 222, 232, 0.95);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
+}
+
+/* =========================================================
+   ENCABEZADOS
+========================================================= */
+
+h1 {
+  margin: 0;
+  color: var(--principal);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+h2 {
+  margin: 0 0 20px;
+  color: var(--principal);
+  font-size: 21px;
+  font-weight: 750;
+}
+
+h3 {
+  margin: 0 0 15px;
+  color: var(--principal);
+  font-size: 17px;
+  font-weight: 750;
+}
+
+/* =========================================================
+   TARJETA MEDICIÓN
+========================================================= */
+
+.medicion {
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.medicion > h2 {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--borde);
+}
+
+/* =========================================================
+   TARJETA PRODUCTO
+========================================================= */
+
+.producto {
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.producto h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 13px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--borde);
+}
+
+/* =========================================================
+   DATOS
+========================================================= */
+
+.dato {
+  display: grid;
+  grid-template-columns: minmax(130px, 180px) 1fr;
+  align-items: center;
+  gap: 15px;
+
+  min-height: 44px;
+  padding: 9px 12px;
+
+  border-bottom: 1px solid #edf0f4;
+}
+
+.dato:last-child {
+  border-bottom: none;
+}
+
+.dato strong {
+  color: var(--texto-secundario);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dato span {
+  color: var(--texto);
+  font-size: 15px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* =========================================================
+   BUSCADOR
+========================================================= */
+
+.buscador {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+
+  margin-bottom: 20px;
+  padding: 14px;
+
+  background: var(--principal);
+  border-radius: 18px;
+  box-shadow: var(--sombra-fuerte);
+}
+
+.buscador input {
+  min-width: 0;
+}
+
+/* =========================================================
+   CAMPOS
+========================================================= */
+
+.campo {
+  margin-bottom: 17px;
+}
+
+.campo label {
+  display: block;
+  margin-bottom: 7px;
+
+  color: var(--texto-secundario);
+
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.2px;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 46px;
+
+  padding: 10px 13px;
+
+  border: 1px solid var(--borde);
+  border-radius: 11px;
+
+  background: #fbfcfe;
+  color: var(--texto);
+
+  font-family: inherit;
+  font-size: 15px;
+
+  outline: none;
+
+  transition: border-color 0.18s ease, box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+input:hover,
+select:hover {
+  background: #ffffff;
+}
+
+input:focus,
+select:focus {
+  background: #ffffff;
+  border-color: var(--principal-2);
+
+  box-shadow: 0 0 0 3px rgba(36, 85, 143, 0.12);
+}
+
+input::placeholder {
+  color: #a4afbd;
+}
+
+/* =========================================================
+   INPUTS NUMÉRICOS
+========================================================= */
+
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+button {
+  min-height: 44px;
+
+  padding: 10px 17px;
+
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: var(--principal);
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease,
+    border-color 0.15s ease, color 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  border-color: #b9c5d5;
+
+  background: #f5f8fc;
+
+  box-shadow: 0 5px 13px rgba(15, 35, 60, 0.09);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================================
+   BOTÓN PRINCIPAL
+========================================================= */
+
+button.guardar {
+  border: none;
+
+  background: linear-gradient(135deg, #17365d, #24558f);
+
+  color: white;
+
+  box-shadow: 0 7px 16px rgba(23, 54, 93, 0.22);
+}
+
+button.guardar:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4779, #2d67a7);
+
+  box-shadow: 0 9px 20px rgba(23, 54, 93, 0.27);
+}
+
+/* =========================================================
+   OPCIONES
+========================================================= */
+
+.opciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.opcion {
+  flex: 1;
+  min-width: 150px;
+
+  min-height: 48px;
+
+  border: 1px solid var(--borde);
+
+  background: #f7f9fc;
+
+  color: var(--texto-secundario);
+}
+
+.opcion:hover:not(:disabled) {
+  border-color: var(--principal-2);
+  background: var(--principal-claro);
+  color: var(--principal);
+}
+
+.opcion.activa {
+  border-color: var(--principal);
+
+  background: linear-gradient(135deg, var(--principal), var(--principal-2));
+
+  color: #ffffff;
+
+  box-shadow: 0 6px 14px rgba(23, 54, 93, 0.2);
+}
+
+/* =========================================================
+   PIEZAS MULTIPIEZA
+========================================================= */
+
+.pieza {
+  position: relative;
+
+  margin: 15px 0;
+  padding: 19px;
+
+  background: linear-gradient(145deg, #ffffff, #f7f9fc);
+
+  border-left: 5px solid var(--principal-2);
+}
+
+.pieza h3 {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 18px;
+
+  color: var(--principal);
+}
+
+/* =========================================================
+   VOLUMEN
+========================================================= */
+
+.volumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+  gap: 12px;
+
+  margin: 20px 0;
+}
+
+.volumen > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-height: 75px;
+
+  padding: 14px 16px;
+
+  border: 1px solid #dbe4ef;
+  border-radius: 13px;
+
+  background: linear-gradient(135deg, #f4f7fb, #ffffff);
+}
+
+.volumen strong {
+  margin-bottom: 5px;
+
+  color: var(--texto-secundario);
+
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.volumen span {
+  color: var(--principal);
+
+  font-size: 21px;
+  font-weight: 800;
+
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.mensaje {
+  margin: 12px 0;
+  padding: 12px 15px;
+
+  border: 1px solid #dbe4ef;
+  border-radius: 11px;
+
+  background: #f4f7fb;
+  color: #4b5d73;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mensaje strong {
+  color: var(--principal);
+}
+
+/* =========================================================
+   TABLAS
+========================================================= */
+
+.tabla-historial {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid var(--borde);
+  border-radius: 13px;
+
+  background: #ffffff;
+}
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 13px;
+}
+
+thead {
+  background: var(--principal);
+  color: white;
+}
+
+th {
+  padding: 12px 10px;
+
+  text-align: left;
+
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+td {
+  padding: 11px 10px;
+
+  border-bottom: 1px solid #e8edf3;
+
+  color: var(--texto);
+
+  vertical-align: middle;
+}
+
+tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #eef4fb;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   BOTÓN QUITAR
+========================================================= */
+
+table button {
+  min-height: 34px;
+  padding: 6px 10px;
+
+  border-color: #f0caca;
+
+  background: var(--rojo-claro);
+  color: var(--rojo);
+
+  font-size: 12px;
+}
+
+table button:hover:not(:disabled) {
+  border-color: var(--rojo);
+  background: #ffe4e4;
+}
+
+/* =========================================================
+   MODALES
+========================================================= */
+
+.modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(10, 25, 45, 0.68);
+
+  backdrop-filter: blur(5px);
+
+  overflow-y: auto;
+}
+
+.modal-contenido {
+  width: min(650px, 100%);
+
+  max-height: calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  padding: 24px;
+
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+
+  animation: aparecerModal 0.2s ease-out;
+}
+
+@keyframes aparecerModal {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   CABECERA MODAL
+========================================================= */
+
+.modal-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid var(--borde);
+}
+
+.modal-cabecera h2 {
+  margin: 0;
+
+  color: var(--principal);
+}
+
+.modal-cabecera button {
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  background: #f1f4f8;
+
+  color: var(--texto-secundario);
+
+  font-size: 18px;
+}
+
+/* =========================================================
+   DETALLE PRODUCTO MODAL
+========================================================= */
+
+.detalle-producto {
+  padding: 17px;
+
+  border: 1px solid var(--borde);
+  border-radius: 13px;
+
+  background: #f8fafc;
+}
+
+.detalle-producto p {
+  margin-top: 0;
+
+  color: var(--texto);
+
+  line-height: 1.6;
+}
+
+.detalle-producto > div {
+  padding: 8px 0;
+
+  border-bottom: 1px solid #e6ebf1;
+
+  color: var(--texto-secundario);
+}
+
+.detalle-producto > div:last-child {
+  border-bottom: none;
+}
+
+.detalle-producto strong {
+  color: var(--texto);
+}
+
+/* =========================================================
+   TOTALES MODAL
+========================================================= */
+
+.detalle-totales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+
+  gap: 12px;
+}
+
+.detalle-totales > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  padding: 14px;
+
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #f6f8fb, #ffffff);
+}
+
+.detalle-totales strong {
+  color: var(--texto-secundario);
+
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.detalle-totales span {
+  color: var(--principal);
+
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.app > .contenedor {
+  min-height: calc(100vh - 78px);
+}
+
+.app > .contenedor > .medicion:first-child {
+  width: min(500px, 100%);
+  margin: 7vh auto 0;
+
+  padding: 32px;
+
+  background: linear-gradient(145deg, #ffffff, #f7f9fc);
+
+  border-top: 6px solid var(--principal);
+
+  box-shadow: 0 20px 55px rgba(15, 35, 60, 0.14);
+}
+
+.app > .contenedor > .medicion:first-child h1 {
+  margin-bottom: 8px;
+
+  text-align: center;
+}
+
+.app > .contenedor > .medicion:first-child h2 {
+  margin-bottom: 25px;
+
+  text-align: center;
+
+  color: var(--texto-secundario);
+
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   LOGIN - BOTÓN
+========================================================= */
+
+.app > .contenedor > .medicion:first-child .guardar {
+  width: 100%;
+
+  margin-top: 8px;
+
+  min-height: 50px;
+
+  font-size: 15px;
+}
+
+/* =========================================================
+   CABECERA USUARIO
+========================================================= */
+
+.contenedor > div:first-child {
+  margin-bottom: 20px;
+}
+
+.contenedor > div:first-child .mensaje {
+  display: inline-block;
+
+  margin-bottom: 0;
+
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* =========================================================
+   BOTÓN CERRAR SESIÓN
+========================================================= */
+
+.contenedor > div:first-child > button {
+  border-color: #d8bebe;
+
+  background: #fff7f7;
+
+  color: #a33737;
+}
+
+.contenedor > div:first-child > button:hover {
+  border-color: #c83c3c;
+
+  background: #ffecec;
+
+  color: #a52f2f;
+}
+
+/* =========================================================
+   SECCIÓN CAJA MASTER
+========================================================= */
+
+.producto[style*="marginTop"] {
+  background: linear-gradient(145deg, #ffffff, #f6f9fc);
+}
+
+/* =========================================================
+   ESTADO POSITIVO
+========================================================= */
+
+.mensaje:has(+ .volumen) {
+  border-left: 4px solid var(--principal-2);
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e8edf3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #aab7c7;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8797aa;
+}
+
+/* =========================================================
+   SELECCIÓN
+========================================================= */
+
+::selection {
+  background: rgba(36, 85, 143, 0.2);
+  color: var(--principal);
+}
+
+/* =========================================================
+   RESPONSIVE TABLET
+========================================================= */
+
+@media (max-width: 800px) {
+  .app {
+    padding: 18px 12px 35px;
+  }
+
+  .buscador {
+    grid-template-columns: 1fr;
+  }
+
+  .buscador button {
+    width: 100%;
+  }
+
+  .dato {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .dato strong {
+    font-size: 11px;
+  }
+
+  .dato span {
+    font-size: 14px;
+  }
+
+  .medicion,
+  .producto {
+    padding: 18px;
+    border-radius: 15px;
+  }
+
+  .modal {
+    padding: 10px;
+  }
+
+  .modal-contenido {
+    max-height: calc(100vh - 20px);
+    padding: 18px;
+    border-radius: 16px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE CELULAR
+========================================================= */
+
+@media (max-width: 520px) {
+  .app {
+    padding: 10px 8px 25px;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .medicion,
+  .producto {
+    padding: 15px;
+  }
+
+  .pieza {
+    padding: 14px;
+  }
+
+  .opciones {
+    flex-direction: column;
+  }
+
+  .opcion {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .volumen {
+    grid-template-columns: 1fr;
+  }
+
+  .detalle-totales {
+    grid-template-columns: 1fr;
+  }
+
+  .app > .contenedor > .medicion:first-child {
+    margin-top: 3vh;
+    padding: 22px 17px;
+  }
+
+  table {
+    min-width: 650px;
+  }
+}
+
+/* =========================================================
+   ANIMACIONES SUAVES
+========================================================= */
+
+.medicion,
+.producto,
+.pieza {
+  animation: aparecer 0.25s ease-out;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   FOCUS PARA OPERARIOS
+========================================================= */
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(36, 85, 143, 0.2);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   IMPRESIÓN
+========================================================= */
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .app {
+    padding: 0;
+  }
+
+  button {
+    display: none !important;
+  }
+
+  .modal {
+    position: static;
+    background: white;
+  }
+
+  .modal-contenido {
+    box-shadow: none;
+    max-height: none;
+  }
+}
+/* =========================================================
+   AUDITORÍA DE VOLUMEN DE PALLETS
+   ========================================================= */
+
+.auditoria-pallet {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.auditoria-pallet-header {
+  margin-bottom: 20px;
+}
+
+.auditoria-pallet-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.auditoria-pallet-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Tarjeta principal */
+.auditoria-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+/* Título de cada bloque */
+.auditoria-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* GRID DE CAMPOS */
+.auditoria-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Campo que ocupa todo el ancho */
+.auditoria-grid-full {
+  grid-column: 1 / -1;
+}
+
+/* Grupo de input */
+.auditoria-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auditoria-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.auditoria-field input,
+.auditoria-field select,
+.auditoria-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auditoria-field input:focus,
+.auditoria-field select:focus,
+.auditoria-field textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.auditoria-field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Volumen físico calculado */
+.auditoria-volumen {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.auditoria-volumen-label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.auditoria-volumen-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Botones */
+.auditoria-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.auditoria-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.auditoria-btn:hover {
+  opacity: 0.9;
+}
+
+.auditoria-btn:active {
+  transform: scale(0.98);
+}
+
+.auditoria-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.auditoria-btn-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.auditoria-btn-secondary {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.auditoria-btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Tabla de auditorías */
+.auditoria-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.auditoria-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.auditoria-table th {
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 12px 10px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.auditoria-table td {
+  padding: 11px 10px;
+  font-size: 13px;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.auditoria-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Estado de auditoría */
+.auditoria-estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.auditoria-estado-ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.auditoria-estado-alerta {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Mensajes */
+.auditoria-mensaje {
+  padding: 11px 14px;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.auditoria-mensaje-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.auditoria-mensaje-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Cabecera de la tabla */
+.auditoria-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.auditoria-table-header h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+/* Buscador */
+.auditoria-search {
+  min-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+}
+
+.auditoria-search:focus {
+  border-color: #2563eb;
+}
+
+/* =========================================================
+     RESPONSIVE - CELULAR / POCKET SCANNER
+     ========================================================= */
+
+@media (max-width: 700px) {
+  .auditoria-pallet {
+    padding: 12px;
+  }
+
+  .auditoria-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auditoria-grid-full {
+    grid-column: auto;
+  }
+
+  .auditoria-card {
+    padding: 15px;
+  }
+
+  .auditoria-pallet-header h2 {
+    font-size: 20px;
+  }
+
+  .auditoria-actions {
+    flex-direction: column;
+  }
+
+  .auditoria-btn {
+    width: 100%;
+  }
+
+  .auditoria-search {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
